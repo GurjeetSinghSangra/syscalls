@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "../inc/keygenerator.h"
 
-
-int generateKey(int requestNumber, int service) {
-    return 1;
+long generateKey(long requestNumber, short service) {
+    return 1l;
 }

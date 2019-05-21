@@ -15,29 +15,24 @@ char *baseClientFifoPath = "/tmp/client_fifo";
 char *serverFifoPath = "/tmp/server_fifo";
 
 int main (int argc, char *argv[]) {
-    char userCode[USER_CODE_LENGTH];
-    char serviceInput[USER_CODE_LENGTH];
+    //char userCode[USER_CODE_LENGTH];
+    //char serviceInput[USER_CODE_LENGTH];
     char clientFifoPath [100];
     
-    int service;
     struct Request request;
     request.pid = getpid();
 
     printf("Benvenuto a clientReq!\n");
     printf("Inserire codice identificativo: ");
-    scanf("%s\n", &request.user_code);
+    scanf("%s", request.user_code);
     
     printf("Inserire il servizio richiesto: ");
-    scanf("%s\n", &request.service);
-
-    //test
-    printf("user code: %s\n", request.user_code);
-    printf("service: %s\n", request.service);
+    scanf("%s", request.service);
 
     //FIFO CLIENT CREATION
     sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, getpid());//maybe to change sprintf con concat
     
-    if(mkfifo(clientFifoPath, S_IRUSR | S_IWGRP | S_IWUSR) == -1)
+    if(mkfifo(clientFifoPath, S_IRUSR | S_IWUSR | S_IWGRP) == -1)
         errExit("Creation fifo client failed");
     
     //Connection to server FIFO
@@ -58,15 +53,17 @@ int main (int argc, char *argv[]) {
     if(clientFifoPathFD == -1) {
         errExit("Read client FIFO has failed");
     }
+
     struct Response response;
-    if(read(clientFifoPathFD, &response, sizeof(struct Response) 
-        != sizeof(struct Response))) {
-            errExit("Response Fifo Client read failed");
+    int bufferRead = -1;
+    bufferRead = read(clientFifoPathFD, &response, sizeof(struct Response));
+    if(bufferRead != sizeof(struct Response)) {
+        errExit("Response Fifo Client read failed");
     }
     if(response.noservice) {
         printf("Servizio richiesto al server non disponibile\n");
     } else {
-        printf("Chiave rilasciata dal server: %d\n", response.key);
+        printf("Chiave rilasciata dal server: %li \n", response.key);
     }
     //Close and unlink the FD and file
     if(close(serverFifoFD) || close(clientFifoPathFD) == -1)

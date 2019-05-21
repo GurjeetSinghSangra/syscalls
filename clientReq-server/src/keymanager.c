@@ -6,7 +6,7 @@
 #include <time.h>
 #include <signal.h>
 #include <fcntl.h> //for file descriptor, servira?
-
+#include "../inc/keymanager.h"
 
 int keymanager() {
     while(1) {
@@ -14,12 +14,11 @@ int keymanager() {
         while (tempo!=0){
             tempo = sleep(tempo);
         }
-        printf("30 secoonds has been passed! Key manager Task begin\n");
         //TODO: KEY MANAGER DELETE TASk!
     }
     return 0;
 }
 
-int insertKey(int key, char userCode[]) {
+long insertKey(long key, char userCode[]) {
     return 0;
 }

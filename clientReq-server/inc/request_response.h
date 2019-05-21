@@ -1,8 +1,8 @@
+#ifndef _REQUEST_RESPONSE_HH
+#define _REQUEST_RESPONSE_HH
 
 #include "constant.h"
-#include <stdio.h>
 #include <sys/types.h>
-
 
 struct Request {
     char user_code[USER_CODE_LENGTH];
@@ -11,6 +11,8 @@ struct Request {
 };
 
 struct Response {
-    int key;
-    int noservice; //FLAG field, if it has value 1, the requested service is NOT avvailable.
+    long key;
+    short noservice;
 };
+
+#endif
