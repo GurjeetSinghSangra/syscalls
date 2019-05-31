@@ -20,7 +20,6 @@ int main (int argc, char *argv[]) {
     char clientFifoPath [100];
     
     struct Request request;
-    request.pid = getpid();
 
     printf("Benvenuto a clientReq!\n");
     printf("Inserire codice identificativo: ");
@@ -30,7 +29,7 @@ int main (int argc, char *argv[]) {
     scanf("%s", request.service);
 
     //FIFO CLIENT CREATION
-    sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, getpid());//maybe to change sprintf con concat
+    sprintf(clientFifoPath, "%s_%s", baseClientFifoPath, request.user_code);//maybe to change sprintf con concat
     
     if(mkfifo(clientFifoPath, S_IRUSR | S_IWUSR | S_IWGRP) == -1)
         errExit("Creation fifo client failed");
@@ -60,7 +59,8 @@ int main (int argc, char *argv[]) {
     if(bufferRead != sizeof(struct Response)) {
         errExit("Response Fifo Client read failed");
     }
-    if(response.noservice) {
+    //RESPONSE
+    if(response.key == -1) {
         printf("Servizio richiesto al server non disponibile\n");
     } else {
         printf("Chiave rilasciata dal server: %li \n", response.key);
