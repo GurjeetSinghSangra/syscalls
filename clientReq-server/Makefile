@@ -3,7 +3,7 @@ CFLAGS=-Wall -std=gnu99
 INCLUDES=-I./inc
 
 # list source code files for server executable
-SERVER_SRCS=src/server.c src/errExit.c src/keygenerator.c src/keymanager.c
+SERVER_SRCS=src/server.c src/errExit.c src/keygenerator.c src/keymanager.c src/sharedmemory.c src/semaphore.c
 
 # list source code files for client executable
 CLIENT_SRCS=src/clientReq.c src/errExit.c
