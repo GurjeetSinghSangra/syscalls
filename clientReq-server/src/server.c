@@ -55,8 +55,11 @@ void quit() {
 }
 
 void sigHandler(int sig) {
-    if(sig == SIGTERM && childpid != 0) {
-        kill(childpid, SIGTERM);
+    printf("Sig term called %d\n", getpid());
+    if(sig == SIGTERM) {
+        printf("Killing process %d\n", childpid);
+        if(kill(childpid, SIGTERM) == -1)
+            printf("Killing child task failed!\n");
         wait(NULL);
         quit();
     }
@@ -91,7 +94,7 @@ int main (int argc, char *argv[]) {
     if(sigprocmask(SIG_SETMASK, &signalset, NULL) == -1)
         errExit("Error setting mask");
 
-    
+    //SHARED MEMORY
     key_t keySharedMem = ftok(IPC_SHD_MEM_KEY_PATH, 'a');
     if(keySharedMem == -1)
         errExit("Ftok for shdmem failed!");
@@ -102,29 +105,34 @@ int main (int argc, char *argv[]) {
     mempointer = (struct Memoryrow*) attachSharedMemory(shmid, 0);
     printf("This is the shared mem id: %d\n", shmid);
 
-    
+    //SEMAPHORE AND INITIALIZATION
     key_t keySem = ftok(IPC_SEM_KEY_PATH, 'a');
     if(keySem == -1)
         errExit("Ftok for semaphore failed!");
     semid = createSemaphore(keySem, 1);
     printf("This is the semaphore id: %d\n", semid);
     union semun sem;
-    sem.val = 0;
+    sem.val = 1;
     semctl(semid, 0, SETVAL, sem);
     
-    //Create keymanager using fork and start it!
+    //Init child and create keymanager
     pid_t pid = fork();
     if(pid == 0) {
-        //Remove the sig alarm from masked signals!
-        if(sigdelset(&signalset, SIGALRM) == -1)
-            errExit("Error removing alarm from mask set");
+        //CHILD process
+
         //RESET SIGNAL SIGTERM
         if (signal(SIGTERM, SIG_DFL) == SIG_ERR )
             errExit("Error resetting sigterm for child process");
+            
+        //Remove the sig alarm from masked signals!
+        if(sigdelset(&signalset, SIGALRM) == -1)
+            errExit("Error removing alarm from mask set");
         if(sigprocmask(SIG_SETMASK, &signalset, NULL) == -1)
             errExit("Error setting mask for ALRM");
+        //start keymanager
         keymanager(shmid, semid, mempointer);
     } else {
+        //SERVER parent process code
         childpid = pid;
         //Creation Fifo Server in tmp, the creation could be before, but it should not change anything to the architecture
         if(mkfifo(serverFifoPath, S_IRUSR | S_IWUSR | S_IRGRP) == -1) {
@@ -141,7 +149,7 @@ int main (int argc, char *argv[]) {
         if(serverFifoExtraFD == -1)
             errExit("Writing server fifo Failed");
         
-        //Manage clients requests and insert inside the shared memory
+        //Manage client requests and insert inside the shared memory
         int bufferRead = -1;
         struct Request request;
         do {

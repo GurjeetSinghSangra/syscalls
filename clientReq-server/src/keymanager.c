@@ -47,6 +47,7 @@ int keymanager(int memoryId, int semaphoreId, struct Memoryrow *pointer) {
 //Caled just by the server (parent) process
 int insertKey(long key, char userCode[]) {
     //TODO: ENTER in critical section
+    printf("Insterting key in memory\n");
     enterInCriticalSection(semid, 0);
     if(lastInsertedKeyPos < LENGTH_SHARED_MEM) {
         struct Memoryrow newRow;
