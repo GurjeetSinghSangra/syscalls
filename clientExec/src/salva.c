@@ -9,18 +9,18 @@
 
 
 int main (int argc, char *argv[]) {
-    printf("Benvenuto sono il programma salva!\n"); 
-    if(argc == 1)
-        errExit("No args");
-
+    printf("Benvenuto sono il programma salva!\n");
+    if(argc < 3)
+        errExit("Invalid arguments, minimum 3");
+    printf("Ora salvo i tuoi argomenti nel file %s\n", argv[1]); 
     
-    int fileFD  = open("text", O_CREAT | O_WRONLY | O_TRUNC);
+    int fileFD  = open(argv[1], O_CREAT | O_WRONLY | O_TRUNC);
     if(fileFD == -1) {
         errExit("Error open/creation file");
     }
     
 
-    for(int i=1; i<argc; i++) {
+    for(int i=2; i<argc; i++) {
         write(fileFD, argv[i], strlen(argv[i]));
         write(fileFD, "\n", strlen("\n"));
     }
