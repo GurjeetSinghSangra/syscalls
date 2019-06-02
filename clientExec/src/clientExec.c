@@ -8,21 +8,20 @@
 #include "../inc/semaphore.h"
 #include "../inc/constant.h"
 
+const int SERVICE_PRINT = 6;
+const int SERVICE_SAVE = 7;
+const int SERVICE_SEND = 8;
 
 const char *IPC_SHD_MEM_KEY_PATH = "../IPC_KEYS/ipc_key_mem.conf";
 const char *IPC_SEM_KEY_PATH = "../IPC_KEYS/ipc_key_sem.conf";
-const char *STAMPA = "Stampa";
-const char *INVIA = "Invia";
-const char *SALVA = "Salva";
 
 int main (int argc, char *argv[]) {
-    if(argc < 4) {
+    if(argc < 3) {
         errExit("Wrong arugments number, minimum 3 please...");
     }
 
     char *userCode = argv[1];
     long key = strtol(argv[2], NULL, 10);
-    char *serviceInput = argv[3];
 
     //--SEMAPHORE--
     key_t semkey = ftok(IPC_SEM_KEY_PATH, 'a');
@@ -53,24 +52,29 @@ int main (int argc, char *argv[]) {
     if(findMark > 0) {
         printf("Chiave trovata!\n");
         //TODO change to 3
-        int length = argc-4;
+        int length = argc-2;
         char *args[length+1];
-        int j = 4;
-        for(int i=0; i<length; i++) {
+        int j = 3;
+        for(int i=1; i<length; i++) {
             args[i] = argv[j];
-            printf("%s\n", args[i]);
+            j++;
         }
         args[length] = (char *)NULL;
         //TODO recognize the service from the key...
-        if(strcmp(serviceInput, STAMPA) == 0) {
-            execvp("stampa", args);
-        } else if(strcmp(serviceInput, INVIA) == 0) {
-            execvp("invia", args);
-        } else if(strcmp(serviceInput, SALVA) == 0) {
-            execvp("salva", args);
+        int service = (int) (key % 10);
+        if(service == SERVICE_PRINT) {
+            args[0] = "stampa";
+            execvp("./stampa", args);
+        } else if(service == SERVICE_SEND) {
+            args[0] = "invia";
+            execvp("./invia", args);
+        } else if(service == SERVICE_SAVE) {
+            args[0] = "salva";
+            execvp("./salva", args);
         } else {
-            printf("Servizio inesistente.\n");
+            printf("Servizio inesistente. Errore con la chiave data...\n");
         }
+        errExit("erro executing program");
     } else {
         if(findMark == -1) {
             printf("La chiave richiesta è già stata utilizzata!\n");

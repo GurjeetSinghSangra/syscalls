@@ -11,10 +11,11 @@
 int main (int argc, char *argv[]) {
     printf("Benvenuto sono il programma salva!\n");
     if(argc < 3)
-        errExit("Invalid arguments, minimum 3");
+        errExit("Invalid arguments, no list arguments,passed, minimum 3 args");
     printf("Ora salvo i tuoi argomenti nel file %s\n", argv[1]); 
     
-    int fileFD  = open(argv[1], O_CREAT | O_WRONLY | O_TRUNC);
+    int fileFD  = open(argv[1], O_CREAT | O_TRUNC | O_WRONLY, 
+          S_IRGRP | S_IRUSR | S_IWGRP | S_IWUSR);
     if(fileFD == -1) {
         errExit("Error open/creation file");
     }

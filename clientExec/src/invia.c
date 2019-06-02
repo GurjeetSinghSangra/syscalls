@@ -14,7 +14,7 @@ struct Message {
 int main (int argc, char *argv[]) {
     printf("Benvenuto sono il programma Invia!\n");
     if(argc < 3)
-        errExit("Invalid arguments, minimum 3");
+        errExit("Invalid arguments, no list arguments,passed, minimum 3 args");
     int msgkey = atoi(argv[0]);
     if(msgkey < 0) {
         errExit("Invalid key");
