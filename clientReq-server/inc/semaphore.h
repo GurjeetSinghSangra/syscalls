@@ -14,7 +14,7 @@ union semun {
 void semOp (int semid, unsigned short semaphoreNumb, short operation);
 int createSemaphore(key_t key, int numsem);
 int removeSemaphore(int semid);
-int enterInCriticalSection(int semId, unsigned short semaphoreNumb);
-int exitFromCriticalSection(int semId, unsigned short semaphoreNumb);
+void enterInCriticalSection(int semId);
+void exitFromCriticalSection(int semId);
 
 #endif

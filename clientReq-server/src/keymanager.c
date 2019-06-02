@@ -15,16 +15,16 @@
 int shmid;
 int semid;
 struct Memoryrow *mempointer;
-int *lastFreeCell;
-const int TIME_THRESHOLD = 60 * 1;
+int *maxRowUsed;
+const int TIME_THRESHOLD = 60 * 5;
 
 void alarmHandler(int sig) {
     if(sig == SIGALRM) {
         //DELETE KEYs TASK
-        printf("Alarm called after 30 sec! My pid: %d shmid: %d semid: %d\n", getpid(), shmid, semid);
-        enterInCriticalSection(semid, 0);
+        printf("<Key Manager: %d> Alarm triggered!\n", getpid());
+        enterInCriticalSection(semid);
         deleteDeprecatedKeys();
-        exitFromCriticalSection(semid, 0);
+        exitFromCriticalSection(semid);
     }
 }
 
@@ -47,39 +47,25 @@ int keymanager(int memoryId, int semaphoreId, struct Memoryrow *pointer) {
 //Caled just by the server (parent) process
 int insertKey(long key, char userCode[]) {
     //TODO: ENTER in critical section
-    printf("Insterting key in memory\n");
-    enterInCriticalSection(semid, 0);
-    if((*lastFreeCell) < LENGTH_SHARED_MEM) {
-        struct Memoryrow newRow;
-        newRow.key = key;
-        strcpy(newRow.userCode, userCode);
-        newRow.timestamp = time(NULL);
-        printf("Inserting user with code: %s\n at pos %d\n", newRow.userCode, *lastFreeCell);
-        mempointer[(*lastFreeCell)] = newRow;
-        struct Memoryrow row = mempointer[(*lastFreeCell)];
-        printf("Value has been inserted %s, %ld at position %d\n", row.userCode, row.key, (*lastFreeCell));
-        (*lastFreeCell)++;
-        return 1;
-    } else {
-        //The memory is full!!!
-        //Could do possible that the keymanager task has deleted some values
-        //DELETED values, are values with key initiliazed to 0
-        //Let overwrite them, thus it will represent the new value
-        int foundSlot = 0;
-        for(int i=0; i<LENGTH_SHARED_MEM && foundSlot == 0; i++) {
-            struct Memoryrow *row = &(mempointer[i]);
-            if(row->key == 0) {
-                strcpy(row->userCode, userCode);
-                row->timestamp = time(NULL);
-                row->key = key;
-                foundSlot = 1;
-                return 1;
+    enterInCriticalSection(semid);
+    //find first slot
+    int foundSlot = 0;
+    for(int i=0; i<LENGTH_SHARED_MEM && foundSlot == 0; i++) {
+        struct Memoryrow *row = &(mempointer[i]);
+        if(row->key == 0) {
+            strcpy(row->userCode, userCode);
+            row->timestamp = time(NULL);
+            row->key = key;
+            printf("Row inserted in memory at pos %i\n", i);
+            foundSlot = 1;
+            if((*maxRowUsed) <= i) {
+                (*maxRowUsed)++;
             }
         }
     }
     //TODO exit from critical section
-    exitFromCriticalSection(semid, 0);
-    return 0;
+    exitFromCriticalSection(semid);
+    return foundSlot;
 }
 
 //CALLED Just by the server process
@@ -87,9 +73,7 @@ int insertKey(long key, char userCode[]) {
 //Remember items with usercode empty and key with value >0 are used keys.
 void deleteDeprecatedKeys() {
     time_t timestamp = time(NULL);
-    printf("lastFreeCell %d \n", *lastFreeCell);
-    for(int i=0; i <(*lastFreeCell) && i< LENGTH_SHARED_MEM; i++) {//lastFreeCell
-        printf("Check\n");
+    for(int i=0; i <(*maxRowUsed) && i< LENGTH_SHARED_MEM; i++) {
         struct Memoryrow *row = &(mempointer[i]);
         //filter all data which are NOT DELETED and are OLD
         int interval = (int) (timestamp - row->timestamp);

@@ -3,7 +3,6 @@
 
 #include <sys/stat.h>
 
-
 #include "../inc/semaphore.h"
 #include "../inc/errExit.h"
 
@@ -29,10 +28,11 @@ int removeSemaphore(int semid) {
     return 1;
 }
 
-int enterInCriticalSection(int semId, unsigned short semaphoreNumb) {
-    return 1;
+void enterInCriticalSection(int semId) {
+    semop(semId, 0, 0);
+    semop(semId, 0, -1);
 }
 
-int exitFromCriticalSection(int semId, unsigned short semaphoreNumb) {
-    return 1;
+void exitFromCriticalSection(int semId) {
+    semop(semId, 0, 1);
 }

@@ -21,7 +21,8 @@ int main (int argc, char *argv[]) {
     
     struct Request request;
 
-    printf("Benvenuto a clientReq!\n");
+    printf("Benvenuto a ClientReq!\n");
+    printf("Offro i servizi: Stampa, Salva e Invia!\n");
     printf("Inserire codice identificativo: ");
     scanf("%s", request.user_code);
     
@@ -66,7 +67,7 @@ int main (int argc, char *argv[]) {
     } else if(response.key == 0) {
         printf("Chiave non generata. La memoria e` piena.\n");
     } else {
-        printf("Chiave rilasciata dal server: %li \n", response.key);
+        printf("Chiave rilasciata del server: %li \n", response.key);
     }
     //Close and unlink the FD and file
     if(close(serverFifoFD) || close(clientFifoPathFD) == -1)

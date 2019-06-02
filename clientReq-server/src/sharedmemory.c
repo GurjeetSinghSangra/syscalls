@@ -6,7 +6,7 @@
 
 //Create shared memory
 int createSharedMemory(key_t key, size_t size) {
-    int shmid = shmget(key, size, IPC_CREAT | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR); //IPC_EXCL
+    int shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
     if(shmid == -1) {
         errExit("Creation memory failed");
     }
@@ -23,7 +23,7 @@ int createSharedMemoryFromSystem(size_t size) {
 
 //get shared memory in case that the shared memory is already in place return -1
 int getSharedMemory(key_t key, size_t size) {
-    int shmid = shmget(key, size, IPC_CREAT | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
+    int shmid = shmget(key, size, S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
     if(shmid == -1) {
         //chiamato dai processi esterni controllare se la tabella esiste gia, gli altri processi non devono creare la memoria ma solo ottenerla
         errExit("Creation memory failed");

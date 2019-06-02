@@ -37,7 +37,7 @@ long requestNumber = 1;
 int shmid;
 int indexPosShmid;
 struct Memoryrow *mempointer;
-int *lastFreeCell;
+int *maxRowUsed;
 
 int semid;
 
@@ -55,7 +55,7 @@ void quit() {
     freeSharedMemory(mempointer);
     removeSharedMemory(shmid);
 
-    freeSharedMemory(lastFreeCell);
+    freeSharedMemory(maxRowUsed);
     removeSharedMemory(indexPosShmid);
     
     _exit(0);
@@ -102,7 +102,8 @@ int main (int argc, char *argv[]) {
 
     //SHARED MEMORY
     indexPosShmid = createSharedMemoryFromSystem(sizeof(int));
-    lastFreeCell = attachSharedMemory(indexPosShmid, 0);
+    maxRowUsed = attachSharedMemory(indexPosShmid, 0);
+    *maxRowUsed = 0;
 
     key_t keySharedMem = ftok(IPC_SHD_MEM_KEY_PATH, 'a');
     if(keySharedMem == -1)
