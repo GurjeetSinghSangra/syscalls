@@ -9,7 +9,7 @@ int main (int argc, char *argv[]) {
         errExit("No list argumens passed");
 
     for(int i=1; i<argc; i++) {
-        printf("%d) %s\n", i, argv[i]);
+        printf("%s\n", argv[i]);
     }
     printf("Fine...\n");
     return 0;

@@ -8,7 +8,7 @@
 
 //get shared memory in case that the shared memory is already in place return -1
 int getSharedMemory(key_t key, size_t size) {
-    int shmid = shmget(key, size, IPC_CREAT | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
+    int shmid = shmget(key, size, S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
     if(shmid == -1) {
         //chiamato dai processi esterni controllare se la tabella esiste gia, gli altri processi non devono creare la memoria ma solo ottenerla
         errExit("Creation memory failed");
@@ -40,15 +40,13 @@ int findAndMark(char *usercode, long key, struct Memoryrow *ptrSharedMemory) {
         //Not exists
         //Deleted key not found, or (key == 0 and code == usercode)
         if(row->key == key) {
-            printf("we found the key, let check the user code\n");
             if(strcmp(row->userCode, usercode) == 0) {
                 if(row->key == key) {
-                    printf("we found the tuple, now i remove it!\n");
+                    printf("Tuple found, removed from memory!\n");
                     strcpy(row->userCode, "");
                     return 1;
                 }
             } else {
-                printf("Comparing the user code %s\n", row->userCode);
                 if(strcmp(row->userCode, "") == 0) {
                     return -1;
                 }

@@ -40,9 +40,9 @@ int main (int argc, char *argv[]) {
     struct Memoryrow *pointer = (struct Memoryrow*) attachSharedMemory(shmid, 0);
     
     //find and mark key
-    enterInCriticalSection(semid, 0);
+    enterInCriticalSection(semid);
     int findMark = findAndMark(userCode, key, pointer);
-    exitFromCriticalSection(semid, 0);
+    exitFromCriticalSection(semid);
     
     freeSharedMemory(pointer);
     
@@ -79,7 +79,7 @@ int main (int argc, char *argv[]) {
         if(findMark == -1) {
             printf("La chiave richiesta è già stata utilizzata!\n");
         } else {
-            printf("coppia chiave, utente ( %li, %s) inesistente.\n", key, userCode);
+            printf("Coppia chiave, utente ( %li, %s) inesistente.\n", key, userCode);
         }
     }
     

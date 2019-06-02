@@ -22,10 +22,11 @@ int getSemaphore(key_t key, int numsem) {
     return semid;
 }
 
-int enterInCriticalSection(int semId, unsigned short semaphoreNumb) {
-    return 1;
+void enterInCriticalSection(int semId) {
+    semop(semId, 0, 0);
+    semop(semId, 0, -1);
 }
 
-int exitFromCriticalSection(int semId, unsigned short semaphoreNumb) {
-    return 1;
+void exitFromCriticalSection(int semId){
+    semop(semId, 0, 1);
 }
