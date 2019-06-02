@@ -27,9 +27,10 @@ int main (int argc, char *argv[]) {
     
     printf("Inserire il servizio richiesto: ");
     scanf("%s", request.service);
+    request.pid = getpid();
 
     //FIFO CLIENT CREATION
-    sprintf(clientFifoPath, "%s_%s", baseClientFifoPath, request.user_code);//maybe to change sprintf con concat
+    sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, request.pid);
     
     if(mkfifo(clientFifoPath, S_IRUSR | S_IWUSR | S_IWGRP) == -1)
         errExit("Creation fifo client failed");
@@ -62,6 +63,8 @@ int main (int argc, char *argv[]) {
     //RESPONSE
     if(response.key == -1) {
         printf("Servizio richiesto al server non disponibile\n");
+    } else if(response.key == 0) {
+        printf("Chiave non generata. La memoria e` piena.\n");
     } else {
         printf("Chiave rilasciata dal server: %li \n", response.key);
     }

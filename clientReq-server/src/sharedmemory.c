@@ -13,6 +13,14 @@ int createSharedMemory(key_t key, size_t size) {
     return shmid;
 }
 
+int createSharedMemoryFromSystem(size_t size) {
+    int shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
+    if(shmid == -1) {
+        errExit("Creation memory failed");
+    }
+    return shmid;
+}
+
 //get shared memory in case that the shared memory is already in place return -1
 int getSharedMemory(key_t key, size_t size) {
     int shmid = shmget(key, size, IPC_CREAT | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);

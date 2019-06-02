@@ -17,23 +17,27 @@
 #include "../inc/sharedmemory.h"
 #include "../inc/semaphore.h"
 
-const int NO_SERVICE = 4000;
-const int SERVICE_PRINT = 3000;
-const int SERVICE_SAVE = 2000;
-const int SERVICE_SEND = 1000;
+const int SERVICE_PRINT = 6;
+const int SERVICE_SAVE = 7;
+const int SERVICE_SEND = 8;
+const int NO_SERVICE = 9;
+
 const char *IPC_SHD_MEM_KEY_PATH = "../IPC_KEYS/ipc_key_mem.conf";
 const char *IPC_SEM_KEY_PATH = "../IPC_KEYS/ipc_key_sem.conf";
 
-char *serverFifoPath = "/tmp/server_fifo";
-char *baseClientFifoPath = "/tmp/client_fifo";
+const char *serverFifoPath = "/tmp/server_fifo";
+const char *baseClientFifoPath = "/tmp/client_fifo";
 sigset_t signalset;
 pid_t childpid;
 int serverFifoFD;
 int serverFifoExtraFD;
 long requestNumber = 1;
 
+//
 int shmid;
+int indexPosShmid;
 struct Memoryrow *mempointer;
+int *lastFreeCell;
 
 int semid;
 
@@ -51,6 +55,9 @@ void quit() {
     freeSharedMemory(mempointer);
     removeSharedMemory(shmid);
 
+    freeSharedMemory(lastFreeCell);
+    removeSharedMemory(indexPosShmid);
+    
     _exit(0);
 }
 
@@ -80,7 +87,6 @@ const int getService(char serviceInput[]) {
 int main (int argc, char *argv[]) {
 
     printf("Processo server partito con pid: %d!\n", getpid());
-
     //-----SIGNALS-----
     //Creating and setting signal handler
     if(signal(SIGTERM, sigHandler) == SIG_ERR) {
@@ -95,6 +101,9 @@ int main (int argc, char *argv[]) {
         errExit("Error setting mask");
 
     //SHARED MEMORY
+    indexPosShmid = createSharedMemoryFromSystem(sizeof(int));
+    lastFreeCell = attachSharedMemory(indexPosShmid, 0);
+
     key_t keySharedMem = ftok(IPC_SHD_MEM_KEY_PATH, 'a');
     if(keySharedMem == -1)
         errExit("Ftok for shdmem failed!");
@@ -160,14 +169,16 @@ int main (int argc, char *argv[]) {
                 struct Response response;
                 response.key = -1;
                 const int service = getService(request.service);
-                printf("Richiesta ricevuta da codice: %s, servizio: %i\n", request.user_code, service);
-                if(service != 4000) {
+                printf("Richiesta ricevuta da utente: %s, servizio: %i, pid: %d \n", request.user_code, service, request.pid);
+                if(service != NO_SERVICE) {
                     //Generation key and insertion
-                    long key = generateKey(requestNumber, service);
+                    long key = generateKey(requestNumber, request.pid,service);
                     response.key = key;
                     
-                    if(insertKey(key, request.user_code) == 0)
-                        printf("Key not inserted! \n");
+                    if(insertKey(key, request.user_code) == 0) {
+                        printf("Memory is full! Key not inserted\n");
+                        response.key = 0; //KEY to zero represents Memory full
+                    }
                     requestNumber++;
                 } else {
                     printf("Servizio richiesto non disponibile!\n");
@@ -175,9 +186,9 @@ int main (int argc, char *argv[]) {
                 }
                 //Open client FIFO and send resoonse
 
-                //FIFO CLIENT CREATION
+                //Send response to FIFO CLIENT 
                 char clientFifoPath[100];
-                sprintf(clientFifoPath, "%s_%s", baseClientFifoPath, request.user_code);//maybe to change sprintf con concat
+                sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, request.pid);//maybe to change sprintf con concat
                 int clientFifoPathFD = open(clientFifoPath, O_WRONLY);
                 if(clientFifoPathFD == -1) {
                     printf("Client FIFO open error!\n");
@@ -186,7 +197,7 @@ int main (int argc, char *argv[]) {
                         sizeof(struct Response)) {
                         printf("Write to client FIFO has failed\n");
                     } else {
-                        printf("Risposta inviata a client %s key %li\n", request.user_code, response.key);
+                        printf("Risposta inviata a client %s %d key %li\n", request.user_code, request.pid, response.key);
                     }
                 }
                 if(close(clientFifoPathFD) == -1)

@@ -3,26 +3,36 @@
 #include <unistd.h>
 #include "../inc/keygenerator.h"
 
+#define PRIME 701
+#define SECOND_PRIME 700
+
 struct Node *head = NULL;
 
-long generateKey(long requestNumber, short service) {
-    long key = requestNumber;
+//KEY lowest decimal represents the service used
+long generateKey(long requestNumber, int pid, int service) {
     //generate hash
-    if(containsKey(key) == 1) {
-        printf("The generation of hash has created a replica.\n We have to generate a new one. \n");
-
-        do {
-
-        } while(containsKey(key) == 1);
-    }
-    //add key 
-    addNode(key);
+    int index = 0;
+    int inputHascode = requestNumber + pid;
+    if(inputHascode == PRIME)//the generated key has not to be 0
+        inputHascode++;
+    long key = hashcode(inputHascode, index);
+    key = key *10 + service;//offset for service
     
+    while(containsKey(key) == 1) {
+        printf("The generation of hash has created a replica.\n We have to generate a new one.\n");
+        index++;
+        key = hashcode(inputHascode, index);
+        key = key *10 + service;//offset for service
+    }
+    addNode(key);
     return key;
 }
 
-long hashcode(long requestNumber, int service) {
-    return 1;
+//hash code  h(k, i) = h1(k) + i * h2(k) mod m'
+long hashcode(long request, int index) {
+    long code = request % PRIME; //first hash
+    code = code + index*( 1 + request % SECOND_PRIME); //second hash
+    return code;
 }
 
 int containsKey(long key) {
