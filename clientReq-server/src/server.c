@@ -58,6 +58,8 @@ void quit() {
     freeSharedMemory(maxRowUsed);
     removeSharedMemory(indexPosShmid);
     
+    removeSemaphore(semid);
+    
     _exit(0);
 }
 
@@ -148,7 +150,7 @@ int main (int argc, char *argv[]) {
         if(mkfifo(serverFifoPath, S_IRUSR | S_IWUSR | S_IRGRP) == -1) {
             errExit("Error creation Server FIFO");
         }
-        printf("Attesa di un client\n");
+        printf("<Server> Attesa di un client\n");
         //Open the fifo for read and for extra write to avoid the EOF, remind open is blocking functions!
         serverFifoFD = open(serverFifoPath, O_RDONLY);
         if(serverFifoFD == -1)
@@ -170,14 +172,14 @@ int main (int argc, char *argv[]) {
                 struct Response response;
                 response.key = -1;
                 const int service = getService(request.service);
-                printf("Richiesta ricevuta da utente: %s, servizio: %i, pid: %d \n", request.user_code, service, request.pid);
+                printf("<Server> Richiesta ricevuta da client <%s PID: %d>, servizio richiesto: %i \n", request.user_code, request.pid, service);
                 if(service != NO_SERVICE) {
                     //Generation key and insertion
                     long key = generateKey(requestNumber, request.pid,service);
                     response.key = key;
                     
                     if(insertKey(key, request.user_code) == 0) {
-                        printf("Memory is full! Key not inserted\n");
+                        printf("Memoria piena!! Chiave non inserita\n");
                         response.key = 0; //KEY to zero represents Memory full
                     }
                     requestNumber++;
@@ -198,13 +200,13 @@ int main (int argc, char *argv[]) {
                         sizeof(struct Response)) {
                         printf("Write to client FIFO has failed\n");
                     } else {
-                        printf("Risposta inviata a client %s %d key %li\n", request.user_code, request.pid, response.key);
+                        printf("<Server> Risposta inviata a client <%s PID: %d>, chiave generata %li\n", request.user_code, request.pid, response.key);
                     }
                 }
                 if(close(clientFifoPathFD) == -1)
                     printf("Error closing FIFO client\n");
             }
-            printf("Attesa di un client\n");
+            printf("<Server> Attesa di un client\n");
         } while(bufferRead != -1);
 
     }

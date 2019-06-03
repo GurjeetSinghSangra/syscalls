@@ -21,7 +21,7 @@ const int TIME_THRESHOLD = 60 * 5;
 void alarmHandler(int sig) {
     if(sig == SIGALRM) {
         //DELETE KEYs TASK
-        printf("<Key Manager: %d> Alarm triggered!\n", getpid());
+        printf("<KeyManager: %d> Alarm triggered!\n", getpid());
         enterInCriticalSection(semid);
         deleteDeprecatedKeys();
         exitFromCriticalSection(semid);
@@ -56,7 +56,7 @@ int insertKey(long key, char userCode[]) {
             strcpy(row->userCode, userCode);
             row->timestamp = time(NULL);
             row->key = key;
-            printf("Row inserted in memory at pos %i\n", i);
+            printf("<Server> Dato inserito in memoria a posizione %i\n", i);
             foundSlot = 1;
             if((*maxRowUsed) <= i) {
                 (*maxRowUsed)++;
@@ -78,7 +78,7 @@ void deleteDeprecatedKeys() {
         //filter all data which are NOT DELETED and are OLD
         int interval = (int) (timestamp - row->timestamp);
         if(row->key != 0 && interval > (int) (TIME_THRESHOLD)) {
-            printf("Row deleted at pos %i, usercode: %s key: %li\n", i, row->userCode, row->key);
+            printf("<KeyMananer> Dato scaduto(Usercode: %s key: %li) cancellato alla posizione %i\n", row->userCode, row->key, i);
             row->key=0;
             strcpy(row->userCode, "");
         }

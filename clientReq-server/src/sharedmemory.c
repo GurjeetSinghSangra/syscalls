@@ -6,7 +6,7 @@
 
 //Create shared memory
 int createSharedMemory(key_t key, size_t size) {
-    int shmid = shmget(key, size, IPC_CREAT | IPC_EXCL | S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);
+    int shmid = shmget(key, size, IPC_CREAT |  S_IWGRP | S_IRGRP | S_IRUSR | S_IWUSR);//IPC_EXCL
     if(shmid == -1) {
         errExit("Creation memory failed");
     }
