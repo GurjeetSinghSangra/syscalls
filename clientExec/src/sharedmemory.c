@@ -42,7 +42,6 @@ int findAndMark(char *usercode, long key, struct Memoryrow *ptrSharedMemory) {
         if(row->key == key) {
             if(strcmp(row->userCode, usercode) == 0) {
                 if(row->key == key) {
-                    printf("Tuple found, removed from memory!\n");
                     strcpy(row->userCode, "");
                     return 1;
                 }

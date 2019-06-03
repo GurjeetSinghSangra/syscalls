@@ -46,11 +46,9 @@ int main (int argc, char *argv[]) {
     
     freeSharedMemory(pointer);
     
-    //TODO: retrive the service from the key
-
     //IF key found
     if(findMark > 0) {
-        printf("Chiave trovata!\n");
+        printf("Chiave trovata e rimossa dalla memoria!\n");
         //TODO change to 3
         int length = argc-2;
         char *args[length+1];

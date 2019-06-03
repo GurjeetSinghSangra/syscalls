@@ -15,7 +15,7 @@ void semOp (int semid, unsigned short semaphoreNumb, short operation) {
 }
 
 int getSemaphore(key_t key, int numsem) {
-    int semid = semget(key, numsem, IPC_CREAT | S_IRUSR | S_IRGRP | S_IWUSR | S_IWGRP);
+    int semid = semget(key, numsem, S_IRUSR | S_IRGRP | S_IWUSR | S_IWGRP);
     if(semid == -1) {
         errExit("Creation Semaphore failed");
     }
@@ -23,10 +23,9 @@ int getSemaphore(key_t key, int numsem) {
 }
 
 void enterInCriticalSection(int semId) {
-    semop(semId, 0, 0);
-    semop(semId, 0, -1);
+    semOp(semId, 0, -1);
 }
 
 void exitFromCriticalSection(int semId){
-    semop(semId, 0, 1);
+    semOp(semId, 0, 1);
 }
