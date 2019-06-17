@@ -19,10 +19,11 @@ long generateKey(long requestNumber, int pid, int service) {
     key = key *10 + service;//offset for service
     
     while(containsKey(key) == 1) {
-        printf("The generation of hash has created a replica.\n We have to generate a new one.\n");
+        printf("The generation of hash has created a replica: %li.\n", key);
         index++;
         key = hashcode(inputHascode, index);
         key = key *10 + service;//offset for service
+        printf("We have to generate a new one: %li.\n", key);
     }
     addNode(key);
     return key;

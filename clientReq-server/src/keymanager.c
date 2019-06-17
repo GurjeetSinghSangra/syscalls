@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <signal.h>
-#include <fcntl.h> //for file descriptor, servira?
+#include <fcntl.h> 
 #include <string.h>
 
 #include "../inc/keymanager.h"
@@ -44,9 +44,8 @@ int keymanager(int memoryId, int semaphoreId, struct Memoryrow *pointer) {
     return 0;
 }
 
-//Caled just by the server (parent) process
+//Called just by the server (parent) process
 int insertKey(long key, char userCode[]) {
-    //TODO: ENTER in critical section
     enterInCriticalSection(semid);
     //find first slot
     int foundSlot = 0;
@@ -63,12 +62,10 @@ int insertKey(long key, char userCode[]) {
             }
         }
     }
-    //TODO exit from critical section
     exitFromCriticalSection(semid);
     return foundSlot;
 }
 
-//CALLED Just by the server process
 //DELETED rows, are items with and empty usercode and key equal to 0
 //Remember items with usercode empty and key with value >0 are used keys.
 void deleteDeprecatedKeys() {
@@ -78,7 +75,7 @@ void deleteDeprecatedKeys() {
         //filter all data which are NOT DELETED and are OLD
         int interval = (int) (timestamp - row->timestamp);
         if(row->key != 0 && interval > (int) (TIME_THRESHOLD)) {
-            printf("<KeyMananer> Dato scaduto(Usercode: %s key: %li) cancellato alla posizione %i\n", row->userCode, row->key, i);
+            printf("<KeyMananer> Dato scaduto (Usercode: %s key: %li) cancellato alla posizione %i\n", row->userCode, row->key, i);
             row->key=0;
             strcpy(row->userCode, "");
         }

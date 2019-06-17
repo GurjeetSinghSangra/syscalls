@@ -33,10 +33,11 @@ int serverFifoFD;
 int serverFifoExtraFD;
 long requestNumber = 1;
 
-//
+//shared memory data
 int shmid;
-int indexPosShmid;
 struct Memoryrow *mempointer;
+
+int maxRowShmId;
 int *maxRowUsed;
 
 int semid;
@@ -56,7 +57,7 @@ void quit() {
     removeSharedMemory(shmid);
 
     freeSharedMemory(maxRowUsed);
-    removeSharedMemory(indexPosShmid);
+    removeSharedMemory(maxRowShmId);
     
     removeSemaphore(semid);
     
@@ -74,8 +75,8 @@ void sigHandler(int sig) {
     }
 }
 
+//Service map function
 const int getService(char serviceInput[]) {
-    //la mappatura in interi potrebbe essere sposta sul server
     if(strcmp(serviceInput, "Stampa") == 0) {
         return SERVICE_PRINT;
     } else if(strcmp(serviceInput, "Invia") == 0) {
@@ -103,8 +104,8 @@ int main (int argc, char *argv[]) {
         errExit("Error setting mask");
 
     //SHARED MEMORY
-    indexPosShmid = createSharedMemoryFromSystem(sizeof(int));
-    maxRowUsed = attachSharedMemory(indexPosShmid, 0);
+    maxRowShmId = createSharedMemoryFromSystem(sizeof(int));
+    maxRowUsed = attachSharedMemory(maxRowShmId, 0);
     *maxRowUsed = 0;
 
     key_t keySharedMem = ftok(IPC_SHD_MEM_KEY_PATH, 'a');
@@ -172,7 +173,10 @@ int main (int argc, char *argv[]) {
                 struct Response response;
                 response.key = -1;
                 const int service = getService(request.service);
-                printf("<Server> Richiesta ricevuta da client <%s PID: %d>, servizio richiesto: %i \n", request.user_code, request.pid, service);
+                if(service == NO_SERVICE)
+                    printf("<Server> Richiesta ricevuta da client <%s PID: %d>, servizio richiesto inesistente \n", request.user_code, request.pid);
+                else    
+                    printf("<Server> Richiesta ricevuta da client <%s PID: %d>, servizio richiesto: %i \n", request.user_code, request.pid, service);
                 if(service != NO_SERVICE) {
                     //Generation key and insertion
                     long key = generateKey(requestNumber, request.pid,service);
@@ -191,7 +195,7 @@ int main (int argc, char *argv[]) {
 
                 //Send response to FIFO CLIENT 
                 char clientFifoPath[100];
-                sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, request.pid);//maybe to change sprintf con concat
+                sprintf(clientFifoPath, "%s_%d", baseClientFifoPath, request.pid);
                 int clientFifoPathFD = open(clientFifoPath, O_WRONLY);
                 if(clientFifoPathFD == -1) {
                     printf("Client FIFO open error!\n");

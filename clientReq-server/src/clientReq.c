@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <sys/types.h> //pid_t type
-#include <sys/stat.h> //used for fifo creation
-#include <fcntl.h> //for file descriptor
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "../inc/constant.h"
@@ -15,8 +15,6 @@ char *baseClientFifoPath = "/tmp/client_fifo";
 char *serverFifoPath = "/tmp/server_fifo";
 
 int main (int argc, char *argv[]) {
-    //char userCode[USER_CODE_LENGTH];
-    //char serviceInput[USER_CODE_LENGTH];
     char clientFifoPath [100];
     
     struct Request request;
@@ -28,6 +26,7 @@ int main (int argc, char *argv[]) {
     
     printf("Inserire il servizio richiesto: ");
     scanf("%s", request.service);
+
     request.pid = getpid();
 
     //FIFO CLIENT CREATION
@@ -41,8 +40,8 @@ int main (int argc, char *argv[]) {
     if(serverFifoFD == -1) {
         errExit("Connecting to server FIFO has failed");
     }
+
     //Send data to Server thru FIFO SERVER
-    //memcpy(request.service, serviceInput, sizeof(serviceInput));
     if(write(serverFifoFD, &request, sizeof(struct Request)) 
         != sizeof(struct Request)) {
         errExit("Write Request in FIFO Server has failed");
