@@ -53,12 +53,14 @@ void quit() {
     if (unlink(serverFifoPath) != 0)
         errExit("unlink failed");
     
-    freeSharedMemory(mempointer);
-    removeSharedMemory(shmid);
+    enterInCriticalSection(semid);
+        freeSharedMemory(mempointer);
+        removeSharedMemory(shmid);
 
-    freeSharedMemory(maxRowUsed);
-    removeSharedMemory(maxRowShmId);
-    
+        freeSharedMemory(maxRowUsed);
+        removeSharedMemory(maxRowShmId);
+    exitFromCriticalSection(semid);
+        
     removeSemaphore(semid);
     
     _exit(0);
