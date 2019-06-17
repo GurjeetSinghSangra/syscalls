@@ -49,7 +49,6 @@ int main (int argc, char *argv[]) {
     //IF key found
     if(findMark > 0) {
         printf("Chiave trovata e rimossa dalla memoria!\n");
-        //TODO change to 3
         int length = argc-2;
         char *args[length+1];
         int j = 3;
@@ -58,8 +57,8 @@ int main (int argc, char *argv[]) {
             j++;
         }
         args[length] = (char *)NULL;
-        //TODO recognize the service from the key...
-        int service = (int) (key % 10);
+        int service = (int) (key % 10); 
+        //Recognize the service from key
         if(service == SERVICE_PRINT) {
             args[0] = "stampa";
             execvp("./stampa", args);
@@ -77,7 +76,7 @@ int main (int argc, char *argv[]) {
         if(findMark == -1) {
             printf("La chiave richiesta è già stata utilizzata!\n");
         } else {
-            printf("Coppia chiave, utente ( %li, %s) inesistente.\n", key, userCode);
+            printf("Coppia chiave, utente (%li, %s) inesistente.\n", key, userCode);
         }
     }
     

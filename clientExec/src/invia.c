@@ -15,11 +15,11 @@ int main (int argc, char *argv[]) {
     printf("Benvenuto sono il programma Invia!\n");
     if(argc < 3)
         errExit("Invalid arguments, no list arguments,passed, minimum 3 args");
-    int msgkey = atoi(argv[0]);
+    int msgkey = atoi(argv[1]);
     if(msgkey < 0) {
         errExit("Invalid key");
     }
-    int msgid = msgget(msgkey,  IPC_CREAT | S_IRUSR | S_IWUSR);
+    int msgid = msgget(msgkey, S_IRUSR | S_IWUSR);
     if(msgid == -1) {
         errExit("Error open queue");
     }
