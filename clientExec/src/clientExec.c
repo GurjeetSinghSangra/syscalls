@@ -17,7 +17,7 @@ const char *IPC_SEM_KEY_PATH = "../IPC_KEYS/ipc_key_sem.conf";
 
 int main (int argc, char *argv[]) {
     if(argc < 3) {
-        errExit("Wrong arugments number, minimum 3 please...");
+        errExit("Wrong arugments number, minimum 2 please...");
     }
 
     char *userCode = argv[1];

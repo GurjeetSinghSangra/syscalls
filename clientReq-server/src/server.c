@@ -115,7 +115,6 @@ int main (int argc, char *argv[]) {
         errExit("Ftok for shdmem failed!");
     const int lengthMemory = LENGTH_SHARED_MEM;
     int totalLength = sizeof(struct Memoryrow) * lengthMemory;
-    printf("Total length of memory is %d: \n", totalLength);
     shmid = createSharedMemory(keySharedMem, totalLength);
     mempointer = (struct Memoryrow*) attachSharedMemory(shmid, 0);
     printf("This is the shared mem id: %d\n", shmid);

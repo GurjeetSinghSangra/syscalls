@@ -6,9 +6,11 @@
 
 #include "../inc/errExit.h"
 
+#define MAX_SIZE_BUFFER 500
+
 struct Message {
     long type; /* Message type */
-    char *mtext; /* Message body */
+    char mtext[MAX_SIZE_BUFFER]; /* Message body */
 };
 
 int main (int argc, char *argv[]) {
@@ -32,15 +34,18 @@ int main (int argc, char *argv[]) {
         length++; //for the space character
     }
 
-    message.mtext = (char *)malloc(sizeof(char) * length);
-    for(int i=2; i<argc; i++) {
-        strcat(message.mtext, argv[i]);
-        strcat(message.mtext, " ");
+    strcpy(message.mtext, "");
+    for(int i=2; i<argc  && strlen(message.mtext) <= MAX_SIZE_BUFFER; i++) {
+        if((strlen(message.mtext) + strlen(argv[i])) < MAX_SIZE_BUFFER) {
+            strcat(message.mtext, argv[i]);
+            strcat(message.mtext, " ");
+        }
     }
-    message.mtext[length-1] = '\0';
+    message.mtext[strlen(message.mtext)] = '\0';
     message.type = 1;
-
-    if(msgsnd(msgid, &message, sizeof(message) - sizeof(long), 0) == -1)
+    size_t sizemessage = sizeof(struct Message) - sizeof(long);
+    printf("Size message : %ld\n", sizemessage);
+    if(msgsnd(msgid, &message, sizemessage, 0) == -1)
         errExit("Error sending message");
     printf("Messaggio inviato: %s\nFine...\n", message.mtext);
     return 0;
